@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}
+List new auction
+{% endblock %}
+
+{% block css %}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-2">
+
+  </div>
+
+  <div class="col-md-8">
+
+    <h1>List new auction</h1>
+
+    {% include "notification.html" %}
+
+    <hr>
+
+    <form id="auctionform" name="auctionform" class="form-horizontal"
+      action="/listAuction" method="post">
+
+      <div class="form-group">
+        <label for="title" class="col-sm-2 control-label">Title</label>
+        <div class="col-sm-10">
+          <input type="text" class="form-control required" id="title"
+            name="title" placeholder="title">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="description" class="col-sm-2 control-label">Description</label>
+        <div class="col-sm-10">
+          <input type="text" class="form-control required" id="description"
+            name="description" placeholder="description">
+        </div>
+      </div>
+
+      <div class="form-group date">
+        <label for="starttime" class="col-sm-2 control-label">Startingtime</label>
+        <div class="col-sm-10">
+          <input type="text" class="form-control required" id="starttime"
+            name="starttime" placeholder="starttime" data-provide="datepicker">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="duration" class="col-sm-2 control-label">Duration</label>
+        <div class="col-sm-10">
+          <input type="text" class="form-control required" id="duration"
+            name="duration" placeholder="duration">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="starting_price" class="col-sm-2 control-label">Starting price</label>
+        <div class="col-sm-10">
+          <input type="text" class="form-control required" id="starting_price"
+            name="starting_price" placeholder="starting_price">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="imageFile" class="col-sm-2 control-label">Image upload</label>
+        <div class="col-sm-10">
+          <input type="file" id="imageFile" name="imageFile">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+          <button type="submit" class="btn btn-primary">List</button>
+        </div>
+      </div>
+    </form>
+
+  </div>
+
+  <div class="col-md-2">
+
+  </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+  $(document).ready(function(){
+    $("#auctionform").validate({
+
+    });
+    $("#starttime").datepicker({
+      format: 'dd.mm.yyyy'
+    });
+  });
+</script>
+{% endblock %}

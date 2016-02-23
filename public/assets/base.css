@@ -1,0 +1,14 @@
+.base-nav-margin
+{
+  margin-top: 50px;
+}
+.base-bg-black
+{
+  background-color: black;
+  color: white;
+}
+.base-img-autowidth
+{
+  height: auto;
+  max-width: 100%;
+}

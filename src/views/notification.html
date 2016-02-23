@@ -1,0 +1,16 @@
+{% if notification|length > 0 %}
+  {% if type == "error" %}
+  <div class="alert alert-danger" role="alert">
+  {% else %}
+  <div class="alert alert-info" role="alert">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  {% endif %}
+    <ul>
+      {% for note in notification %}
+        <li>{{ note }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %}

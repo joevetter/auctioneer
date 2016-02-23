@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}
+Auction detail
+{% endblock %}
+
+{% block css %}
+<style>
+  .image_max_width{
+    max-width: 100%;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<h3>Auction details</h3>
+
+{% include "notification.html" %}
+
+<div class="row">
+  <div class="col-md-6">
+    <img class="image_max_width" src="/assets/images_auction/auc_1.jpg" alt="auc_1" />
+
+    <p>{{ auction.description }}</p>
+  </div>
+
+  <div class="col-md-1">
+  </div>
+
+  <div class="col-md-5">
+    <h5>{{ auction.title }}</h5>
+
+    <p>{{ auction.current_price }}</p>
+
+    <p>{{ auction.endtime }}</p>
+
+    {% if status == "ended" %}
+    <button class="btn btn-danger">ended</button>
+    {% elseif session == false %}
+    <button class="btn btn-warning">log in</button>
+    {% else %}
+    <button class="btn btn-success">bid</button>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}
+
+{% block js %}
+{% endblock %}

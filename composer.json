@@ -1,0 +1,22 @@
+{
+    "name": "jvetter/auctioneer",
+    "authors": [
+        {
+            "name": "jvetter",
+            "email": "joevetter@gmx.net"
+        }
+    ],
+    "require": {
+        "filp/whoops": "^2.0",
+        "vlucas/phpdotenv": "^2.2",
+        "illuminate/database": "^5.2",
+        "altorouter/altorouter": "^1.1",
+        "respect/validation": "^1.0",
+        "robmorgan/phinx": "^0.5.1",
+        "cocur/slugify": "^1.4",
+        "twig/twig": "^1.24"
+    },
+    "autoload": {
+      "psr-4": { "Auctioneer\\": "src/"}
+    }
+}

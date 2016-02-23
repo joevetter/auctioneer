@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}
+My Auctions
+{% endblock %}
+
+{% block content %}
+<h3>Hello {{ session.username }}</h3>
+
+<div class="list-group">
+  <a href="#" class="list-group-item active">
+    <h4 class="list-group-item-heading">Your bids</h4>
+  </a>
+
+  {% for bid in bids %}
+    <a href="/bidAuction/{{ bid.id }}" class="list-group-item">
+      <h4 class="list-group-item-heading">{{ bid.title }}</h4>
+      <p class="list-group-item-text">{{ bid.description }}</p>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Endtime</th>
+            <th>Price</th>
+            <th>Seller</th>
+            <th>Bidder</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{ bid.status }}</td>
+            <td class="endtime"><span>{{ bid.endtime }}</span>-<div></div></td>
+            <td>{{ bid.current_price }}</td>
+            <td>{{ bid.sellername }}</td>
+            <td>{{ bid.buyername }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </a>
+  {% endfor %}
+
+</div>
+
+<div class="list-group">
+  <a href="#" class="list-group-item active">
+    <h4 class="list-group-item-heading">Your sales</h4>
+  </a>
+
+  {% for sale in sales %}
+    <a href="/bidAuction/{{ sale.id }}" class="list-group-item">
+      <h4 class="list-group-item-heading">{{ sale.title }}</h4>
+      <p class="list-group-item-text">{{ sale.description }}</p>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Endtime</th>
+            <th>Price</th>
+            <th>Seller</th>
+            <th>Bidder</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{ sale.status }}</td>
+            <td class="endtime"><span>{{ sale.endtime }}</span>-<div></div></td>
+            <td>{{ sale.current_price }}</td>
+            <td>{{ sale.sellername }}</td>
+            <td>{{ sale.buyername }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </a>
+  {% endfor %}
+
+</div>
+
+{% endblock %}
+
+{% block js %}
+<script>
+  $(document).ready(function(){
+    //$(".endtime div").html($(".endtime span"));
+  });
+</script>
+{% endblock %}

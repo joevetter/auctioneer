@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}
+Active Auctions
+{% endblock %}
+
+{% block css %}
+{% endblock %}
+
+{% block content %}
+
+<h3>Hello {{ session.username }}</h3>
+
+{% include "notification.html" %}
+
+<div class="list-group">
+  <a href="#" class="list-group-item active">
+    <h4 class="list-group-item-heading">Active auctions</h4>
+  </a>
+
+  {% for auction in auctions %}
+    <a href="/bidAuction/{{ auction.id }}" class="list-group-item">
+      <h4 class="list-group-item-heading">{{ auction.title }}</h4>
+      <p class="list-group-item-text">{{ auction.description }}</p>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Endtime</th>
+            <th>Price</th>
+            <th>Seller</th>
+            <th>Bidder</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{ auction.status }}</td>
+            <td class="endtime"><span>{{ auction.endtime }}</span>-<div></div></td>
+            <td>{{ auction.current_price }}</td>
+            <td>{{ auction.sellername }}</td>
+            <td>{{ auction.buyername }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </a>
+  {% endfor %}
+
+</div>
+
+{% endblock %}
+
+{% block js %}
+{% endblock %}
