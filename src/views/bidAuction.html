@@ -20,7 +20,7 @@ Auction detail
 
 <div class="row">
   <div class="col-md-6">
-    <img class="image_max_width" src="/assets/images_auction/auc_1.jpg" alt="auc_1" />
+    <img class="image_max_width" src="{{ auction.imagepath }}" alt="auc_1" />
 
     <p>{{ auction.description }}</p>
   </div>
@@ -35,10 +35,10 @@ Auction detail
 
     <p>{{ auction.endtime }}</p>
 
-    {% if status == "ended" %}
+    {% if auction.status == "ended" %}
     <button class="btn btn-danger">ended</button>
     {% elseif session == false %}
-    <button class="btn btn-warning">log in</button>
+    <a href="/login" class="btn btn-warning">log in</a>
     {% else %}
     <button class="btn btn-success">bid</button>
     {% endif %}

@@ -25,18 +25,35 @@ class Validator
               $errors[] = $element . ' must be at least ' . $exploded[1] . ' characters long!';
             }
             break;
+
           case 'email':
             if(false == Valid::email()->Validate($_REQUEST[$element]))
             {
               $errors[] = $element . ' must be a valid e-mail address!';
             }
             break;
+
           case 'equalTo':
             if(false == Valid::equals($_REQUEST[$element])->Validate($_REQUEST[$exploded[1]]))
             {
               $errors[] = $element . ' does not match verification value!';
             }
             break;
+
+          case 'upload':
+            if(false == Valid::uploaded()->Validate($_FILES[$element]["tmp_name"][0]))
+            {
+              $errors[] = $element . ' could not be uploaded!';
+            }
+            break;
+
+          case 'image':
+            if(false == Valid::image()->Validate($_FILES[$element]["tmp_name"][0]))
+            {
+              $errors[] = $element . ' is not an image!';
+            }
+            break;
+
           default:
             $errors[] = $element . ' not found!';
         }

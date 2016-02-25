@@ -22,7 +22,7 @@ List new auction
     <hr>
 
     <form id="auctionform" name="auctionform" class="form-horizontal"
-      action="/listAuction" method="post">
+      action="/listAuction" method="post" enctype="multipart/form-data">
 
       <div class="form-group">
         <label for="title" class="col-sm-2 control-label">Title</label>
@@ -49,7 +49,7 @@ List new auction
       </div>
 
       <div class="form-group">
-        <label for="duration" class="col-sm-2 control-label">Duration</label>
+        <label for="duration" class="col-sm-2 control-label">Duration days</label>
         <div class="col-sm-10">
           <input type="text" class="form-control required" id="duration"
             name="duration" placeholder="duration">
@@ -65,9 +65,9 @@ List new auction
       </div>
 
       <div class="form-group">
-        <label for="imageFile" class="col-sm-2 control-label">Image upload</label>
+        <label for="images" class="col-sm-2 control-label">Image upload</label>
         <div class="col-sm-10">
-          <input type="file" id="imageFile" name="imageFile">
+          <input type="file" name="images[]">
         </div>
       </div>
 

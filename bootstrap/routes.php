@@ -10,7 +10,9 @@ $router->map('GET', '/login', 'Auctioneer\Controllers\AuthenticationController@g
 $router->map('POST', '/login', 'Auctioneer\Controllers\AuthenticationController@postShowLoginPage', 'login_post');
 $router->map('GET', '/logout', 'Auctioneer\Controllers\AuthenticationController@getLogout', 'logout');
 # auction routes
-$router->map('GET', '/myAuctioneer', 'Auctioneer\Controllers\AuctionController@getShowMyAuctions', 'myauctioneer');
+if(Auctioneer\General\LoggedIn::user()){
+  $router->map('GET', '/myAuctioneer', 'Auctioneer\Controllers\AuctionController@getShowMyAuctions', 'myauctioneer');
+}
 $router->map('GET', '/listAuction', 'Auctioneer\Controllers\AuctionController@getShowListAuction', 'listauction');
 $router->map('POST', '/listAuction', 'Auctioneer\Controllers\AuctionController@postShowListAuction', 'listauction_post');
 $router->map('GET', '/bidAuction/[i:id]', 'Auctioneer\Controllers\AuctionController@getShowBidAuction', 'bidauction');
@@ -18,5 +20,6 @@ $router->map('POST', '/bidAuction/[i:id]', 'Auctioneer\Controllers\AuctionContro
 $router->map('GET', '/activeAuctions', 'Auctioneer\Controllers\AuctionController@getShowActiveAuctions', 'activeauctions');
 # test
 $router->map('GET', '/test', 'Auctioneer\Controllers\PageController@getShowTest', 'test');
+$router->map('POST', '/test', 'Auctioneer\Controllers\PageController@postShowTest', 'test_post');
 # generic routes
 $router->map('GET', '/[*]', 'Auctioneer\Controllers\PageController@getShowPage', 'generic_page');

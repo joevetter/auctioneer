@@ -35,7 +35,7 @@ class PageController extends BaseController
     if(empty($title))
     {
       header("HTTP/1.0 404 Not Found");
-      header("Location: /page-not-found");
+      header("Location: /notFound");
       exit();
     }
     # pass content to twig te
@@ -45,8 +45,25 @@ class PageController extends BaseController
       'content' => $content]);
   }
 
+  public function getShowNotFound()
+  {
+    echo $this->twig->render('notFound.html', [
+      'session' => LoggedIn::user(),
+      ]);
+  }
+
   public function getShowTest()
   {
+    echo '<form action="/test" method="post" enctype="multipart/form-data">
+        <input type="file" name="pictures[]">
+        <input type="hidden" name="my_secret" value="secret field">
+        <button type="submit" class="btn btn-primary">upload</button>
+      </form>';
+
+    var_dump(extension_loaded("fileinfo"));
+
+    exit();
+
     $username = LoggedIn::user()->username;
     var_dump($username);
 
@@ -56,6 +73,46 @@ class PageController extends BaseController
       ->where('auctions.seller_id', '=', LoggedIn::user()->id)->get();
     var_dump($bids);
     print_r($bids[0]);
+  }
+
+  public function postShowTest()
+  {
+    if(isset($_FILES["pictures"]))
+    {
+      var_dump($_FILES);
+      echo "<br>-----<br>";
+      var_dump($_REQUEST);
+      echo "<br>-----<br>";
+
+      $folders = array_merge(["assets", "images_auction"],
+          explode("-", date("Y-m-d")),
+          ["4"]);
+      $path = __DIR__ . "/../../public";
+      foreach($folders as $folder)
+      {
+        $path .= "/" . $folder;
+        if(!is_dir($path))
+        {
+          mkdir($path);
+          #echo "<br>- path:" . $path;
+        } else {
+          #echo "<br>+ path:" . $path;
+        }
+      }
+      #echo "path:" . $path . " file:" . __FILE__ . " dir:" . __DIR__; exit();
+
+      foreach ($_FILES["pictures"]["error"] as $key => $error) {
+          if ($error == UPLOAD_ERR_OK) {
+              $tmp_name = $_FILES["pictures"]["tmp_name"][$key];
+              $name = $_FILES["pictures"]["name"][$key];
+              move_uploaded_file($tmp_name, $path . "/" . $name);
+          }
+      }
+      var_dump($_FILES);
+    } else {
+      echo "<br>no no no";
+      var_dump($_FILES);
+    }
   }
 
 }

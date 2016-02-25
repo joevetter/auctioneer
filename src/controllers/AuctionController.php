@@ -12,6 +12,8 @@ class AuctionController extends BaseController
 
   public function getShowMyAuctions()
   {
+    $this->updateAllStati();
+
     $bids = [];
     $sales = [];
 
@@ -33,6 +35,8 @@ class AuctionController extends BaseController
 
   public function getShowListAuction()
   {
+    $this->updateAllStati();
+
     echo $this->twig->render('listAuction.html', [
       'session' => LoggedIn::user()]);
   }
@@ -45,7 +49,7 @@ class AuctionController extends BaseController
       "starttime"     => "min:3",
       "duration"      => "min:1",
       "starting_price" => "min:1",
-      "imageFile"      => "min:1",
+      "images"        => "upload",
     ];
     # validate data
     $validator = new Validator;
@@ -62,39 +66,68 @@ class AuctionController extends BaseController
     }
 
     # save auction in db
-    /*$auction = new Auction();
-    $auction->title = $_REQUEST['title'];
-    $auction->description = $_REQUEST['description'];
-    $auction->starttime = $_REQUEST['starttime'];
-    $auction->endtime = date("Y-m-d H:i:s",
-        strtotime($_REQUEST['starttime']) + 60*60*24* $_REQUEST['duration']);
-    $auction->starting_price = $_REQUEST['starting_price'];
-    $auction->save();*/
-
+    $starttime = date("Y-m-d", strtotime($_REQUEST['starttime'])
+        + strtotime(date("H:i:s")));
     $endtime = date("Y-m-d H:i:s",
-        strtotime($_REQUEST['starttime']) + 60*60*24* $_REQUEST['duration']);
+        strtotime($starttime) + 60*60*24* $_REQUEST['duration']);
+    $status = $this->getStatus($starttime, $endtime);
+
     $auctionId = Auction::insertGetId([
         'title' => $_REQUEST['title'],
         'description' => $_REQUEST['description'],
-        'starttime' => $_REQUEST['starttime'],
+        'starttime' => $starttime,
         'endtime' => $endtime,
         'starting_price' => $_REQUEST['starting_price'],
+        'current_price' => $_REQUEST['starting_price'],
+        'seller_id' => LoggedIn::user()->id,
+        'status' => $status,
       ]);
+    $notification = ['Successful listed!'];
 
     # save image file and path
-    $image = new Image();
-    $image->auction_id = $auctionId;
-    $image->path = $_REQUEST['path'];
-    $image->save();
+    if(isset($_FILES["images"]) && is_numeric($auctionId))
+    {
+      $folders = array_merge(["assets", "images_auction"],
+          explode("-", date("Y-m-d")),
+          [$auctionId]);
+      $path = __DIR__ . "/../../public";
+      foreach($folders as $folder)
+      {
+        $path .= "/" . $folder;
+        if(!is_dir($path))
+        {
+          mkdir($path);
+        }
+      }
+
+      foreach ($_FILES["images"]["error"] as $key => $error) {
+          if ($error == UPLOAD_ERR_OK) {
+              $tmp_name = $_FILES["images"]["tmp_name"][$key];
+              $name = $_FILES["images"]["name"][$key];
+              move_uploaded_file($tmp_name, $path . "/" . $name);
+
+              $image = new Image();
+              $image->auction_id = $auctionId;
+              $image->path = $path . "/" . $name;
+              $image->save();
+          } else {
+            $notification = ['Image not uploaded!'];
+          }
+      }
+    } else {
+      $notification = ['There was an error!'];
+    }
 
     echo $this->twig->render('listAuction.html', [
       'session' => LoggedIn::user(),
-      'notification' => ['Successful listed!'],
+      'notification' => $notification,
       'type' => 'info']);
   }
 
   public function getShowBidAuction($array)
   {
+    $this->updateAllStati();
+
     if(isset($array['id']))
     {
       $id = $array['id'];
@@ -106,13 +139,33 @@ class AuctionController extends BaseController
 
     if(isset($auctions))
     {
-      $auctions = Auction::where('id', '=', $id)->get();
-      $auctions[0]->current_price = Beautify::amount($auctions[0]->current_price);
-      $auctions[0]->endtime = Beautify::date($auctions[0]->endtime);
+      $auctions = Auction::join('users AS users_seller', 'auctions.seller_id', '=', 'users_seller.id')
+        ->leftJoin('users AS users_buyer', 'auctions.buyer_id', '=', 'users_buyer.id')
+        ->leftJoin('images', 'auctions.id', '=', 'images.auction_id')
+        ->select('auctions.*',
+                 'users_seller.username AS sellername',
+                 'users_buyer.username AS buyername',
+                 'images.path AS imagepath')
+        ->where('auctions.id', '=', $id)->first();
 
-      echo $this->twig->render('bidAuction.html', [
-        'session' => LoggedIn::user(),
-        'auction' => $auctions[0]]);
+      if(isset($auctions->current_price)){
+        $auctions->current_price = Beautify::amount($auctions->current_price);
+        $auctions->endtime = Beautify::date($auctions->endtime);
+        $auctions->imagepath = Beautify::imagePath($auctions->imagepath);
+
+        $bids = Auction::join('users AS users_buyer', 'auctions.buyer_id', '=', 'users_buyer.id')
+          ->leftJoin('users AS users_seller', 'auctions.seller_id', '=', 'users_seller.id')
+          ->select('auctions.*', 'users_seller.username AS sellername', 'users_buyer.username AS buyername')
+          ->where('buyer_id', '=', LoggedIn::user()->id)->get();
+
+        echo $this->twig->render('bidAuction.html', [
+          'session' => LoggedIn::user(),
+          'auction' => $auctions]);
+      } else {
+        echo $this->twig->render('notFound.html', [
+          'session' => LoggedIn::user(),
+          ]);
+      }
     } else {
       echo $this->twig->render('notFound.html', [
         'session' => LoggedIn::user(),
@@ -138,5 +191,48 @@ class AuctionController extends BaseController
     echo $this->twig->render('activeAuctions.html', [
       'session' => LoggedIn::user(),
       'auctions' => $auctions]);
+  }
+
+  private function getStatus($starttime, $endtime)
+  {
+    if($starttime > date("Y-m-d H:i:s"))
+    {
+      return "tba";
+    } elseif($endtime < date("Y-m-d H:i:s")) {
+      return "ended";
+    } else {
+      return "running";
+    }
+  }
+
+  private function setStatus($auction, $status)
+  {
+    if(is_numeric($auction) && isset($status))
+    {
+      Auction::where('id', $auction)
+        ->update(['status' => $status]);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  private function updateAllStati()
+  {
+    $now = date("Y-m-d H:i:s");
+
+    Auction::where([
+        ['status', '!=', 'ended'],
+        ['endtime', '<', $now],
+      ])
+      ->update(['status' => 'ended']);
+
+    Auction::where([
+        ['status', '!=', 'ended'],
+        ['status', '!=', 'running'],
+        ['starttime', '<', $now],
+        ['endtime', '>', $now],
+      ])
+      ->update(['status' => 'running']);
   }
 }

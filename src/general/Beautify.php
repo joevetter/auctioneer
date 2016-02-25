@@ -23,4 +23,9 @@ class Beautify
         return date("d.m.Y H:i:s", strtotime($datetime));
     }
   }
+
+  public static function imagePath($path)
+  {
+    return substr($path, strpos($path, "/assets"));
+  }
 }
