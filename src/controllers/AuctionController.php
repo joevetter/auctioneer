@@ -6,6 +6,7 @@ use Auctioneer\General\Validator;
 use Auctioneer\General\Beautify;
 use Auctioneer\Models\Auction;
 use Auctioneer\Models\Image;
+use Auctioneer\Models\Bid;
 
 class AuctionController extends BaseController
 {
@@ -149,14 +150,20 @@ class AuctionController extends BaseController
         ->where('auctions.id', '=', $id)->first();
 
       if(isset($auctions->current_price)){
+        $auctions->minimumBid = Beautify::amount($auctions->current_price + 0.5);
         $auctions->current_price = Beautify::amount($auctions->current_price);
         $auctions->endtime = Beautify::date($auctions->endtime);
         $auctions->imagepath = Beautify::imagePath($auctions->imagepath);
 
-        $bids = Auction::join('users AS users_buyer', 'auctions.buyer_id', '=', 'users_buyer.id')
-          ->leftJoin('users AS users_seller', 'auctions.seller_id', '=', 'users_seller.id')
-          ->select('auctions.*', 'users_seller.username AS sellername', 'users_buyer.username AS buyername')
-          ->where('buyer_id', '=', LoggedIn::user()->id)->get();
+        $bidCount = [];
+        $bids = Bid::where('auction_id', '=', $id)->get();
+        foreach($bids as $bid)
+        {
+          $bidCount[$bid->bidder_id] = $bid->bidder_id;
+        }
+        $bidCount = count($bidCount);
+
+        $auctions->bidCount = $bidCount;
 
         echo $this->twig->render('bidAuction.html', [
           'session' => LoggedIn::user(),
@@ -175,8 +182,28 @@ class AuctionController extends BaseController
 
   public function postShowBidAuction()
   {
-    echo $this->twig->render('bidAuction.html', [
-      'session' => LoggedIn::user()]);
+    $auctionId = $_REQUEST["auctionId"];
+    $newOffer = $_REQUEST["newOffer"];
+
+    if(is_numeric($auctionId) && is_numeric($newOffer))
+    {
+      $result = $this->placeNewOffer($auctionId, $newOffer);
+
+      if($result)
+      {
+        echo json_encode( ["status" => true,
+                          "notification" => "Successfully bid!",
+                        ]);
+      } else {
+        echo json_encode( ["status" => false,
+                          "notification" => "Auction ended or your offer was invalid!",
+                        ]);
+      }
+    } else {
+      echo json_encode( ["status" => false,
+                        "notification" => $newOffer . " is not a valid amount! ",
+                      ]);
+    }
   }
 
   public function getShowActiveAuctions()
@@ -209,7 +236,7 @@ class AuctionController extends BaseController
   {
     if(is_numeric($auction) && isset($status))
     {
-      Auction::where('id', $auction)
+      Auction::where('id', '=', $auction)
         ->update(['status' => $status]);
       return true;
     } else {
@@ -234,5 +261,18 @@ class AuctionController extends BaseController
         ['endtime', '>', $now],
       ])
       ->update(['status' => 'running']);
+  }
+
+  private function placeNewOffer($auctionId, $newOffer)
+  {
+    $updateCount = Auction::where([
+        ['id', '=', $auctionId],
+        ['current_price', '<', $newOffer],
+      ])
+      ->update(['current_price' => $newOffer,
+                'buyer_id' => LoggedIn::user()->id,
+              ]);
+
+    return $updateCount;
   }
 }

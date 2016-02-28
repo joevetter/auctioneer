@@ -14,7 +14,8 @@ class CreateBidTable extends AbstractMigration
         ->addIndex(['auction_id'])
         ->addColumn('bidder_id', 'integer', ['signed' => false])
         ->addIndex(['bidder_id'])
-        ->addColumn('amount', 'decimal')
+        ->addColumn('amount', 'decimal', ['precision' => 10,
+                                          'scale' => 3])
         ->addColumn('created_at', 'timestamp', ['default' => 'CURRENT_TIMESTAMP'])
         ->addColumn('updated_at', 'datetime', ['null' => true])
         ->save();

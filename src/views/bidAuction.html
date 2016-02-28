@@ -31,21 +31,72 @@ Auction detail
   <div class="col-md-5">
     <h5>{{ auction.title }}</h5>
 
-    <p>{{ auction.current_price }}</p>
+    <p>price {{ auction.current_price }}</p>
 
-    <p>{{ auction.endtime }}</p>
+    <p>highest bidder: {{ auction.buyername }}</p>
+
+    <p>ends at {{ auction.endtime }}</p>
 
     {% if auction.status == "ended" %}
     <button class="btn btn-danger">ended</button>
     {% elseif session == false %}
     <a href="/login" class="btn btn-warning">log in</a>
+    {% elseif session.username == auction.sellername %}
+    <button class="btn btn-warning">can not bid on own</button>
     {% else %}
-    <button class="btn btn-success">bid</button>
+    <button class="btn btn-success" id="bidPopupButton"
+      data-toggle="modal" data-target="#bidPopup">bid</button>
+
+    <div class="modal fade" id="bidPopup" tabindex="-1" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h4 class="modal-title">Bid</h4>
+          </div>
+          <div class="modal-body">
+            <div>Current price <span id="currentPrice">{{ auction.current_price }}</span></div>
+            <div>minimum bid <span id="minimumBid">{{ auction.minimumBid }}</span></div>
+            <input type="text" id="newOffer" name="newOffer" value="">
+            <button class="btn btn-primary" id="bidOnAuction">bid</button>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
     {% endif %}
+
+    <div id="testOut"></div>
   </div>
 </div>
 
 {% endblock %}
 
 {% block js %}
+<script type="text/javascript">
+  // currentPrice minimumBid bidOnAuction
+
+  $("#bidOnAuction").click(function(event)
+  {
+    $.ajax({
+      type: "POST",
+      url: "/bidAuction/{{ auction.id }}",
+      data: {
+              "newOffer": $("#newOffer").val(),
+              "auctionId": {{ auction.id }}
+            },
+      dataType: "json",
+      success: function(data){
+        if(data.status)
+        {
+          $("#testOut").html(data.notification);
+        } else {
+          $("#testOut").html(data.notification);
+        }
+      }
+    });
+  });
+</script>
 {% endblock %}
